@@ -1,6 +1,6 @@
 ASM=nasm
-GCC_NATIVE=i386-elf-gcc
-LD_NATIVE=i386-elf-ld
+GCC_NATIVE=tools/i386-cross-compiler/bin/i386-elf-gcc
+LD_NATIVE=tools/i386-cross-compiler/bin/i386-elf-ld
 
 BOOT_DIR=src/boot
 BASE_DIR=src/base
@@ -22,6 +22,11 @@ $(BUILD_DIR)/boot.bin: $(BOOT_DIR)/boot.asm build_folder
 
 build_folder:
 	mkdir -p build
+
+# TOOLS:
+cross-compiler:
+	sh tools/setup-cross-compiler-arch.sh
+
 
 clean:
 	rm -rf $(BUILD_DIR)

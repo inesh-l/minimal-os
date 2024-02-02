@@ -1,0 +1,3 @@
+tools/i386-cross-compiler/
+tmp/
+build/
