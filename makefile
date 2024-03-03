@@ -3,7 +3,7 @@ GCC_NATIVE=tools/i386-cross-compiler/bin/i386-elf-gcc
 LD_NATIVE=tools/i386-cross-compiler/bin/i386-elf-ld
 
 BOOT_DIR=src/boot
-BASE_DIR=src/base
+BASE_DIR=src/kernel
 
 BUILD_DIR=build
 
