@@ -1,32 +1,27 @@
-ASM=nasm
-GCC_NATIVE=tools/i386-cross-compiler/bin/i386-elf-gcc
-LD_NATIVE=tools/i386-cross-compiler/bin/i386-elf-ld
+ASM=~/opt/i686-cross-compiler/bin/i686-elf-as
+GCC=~/opt/i686-cross-compiler/bin/i686-elf-gcc
+LD=~/opt/i686-cross-compiler/bin/i386-elf-ld
 
-BOOT_DIR=src/boot
-BASE_DIR=src/kernel
+KERNEL_DIR=src/kernel
+GRUB_DIR=src/grub
 
 BUILD_DIR=build
 
-$(BUILD_DIR)/os.img: $(BUILD_DIR)/kernel.bin $(BUILD_DIR)/boot.bin
-	cat $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin > $(BUILD_DIR)/os.img
-	truncate -s 1440k $(BUILD_DIR)/os.img;
+all: os.iso
 
+os.iso: $(BUILD_DIR)/os.bin $(GRUB_DIR)/grub.cfg 
+	mkdir isodir/boot/grub -p
+	cp $(GRUB_DIR)/grub.cfg isodir/boot/grub/grub.cfg
+	cp $(BUILD_DIR)/os.bin isodir/boot/os.bin
+	grub-mkrescue -o os.iso isodir
 
-$(BUILD_DIR)/kernel.bin: $(BASE_DIR)/kernel_entry.asm $(BASE_DIR)/kernel.c build_folder
-	$(ASM) $(BASE_DIR)/kernel_entry.asm -f elf -o $(BUILD_DIR)/kernel_entry.o
-	$(GCC_NATIVE) -ffreestanding -m32 -g -c $(BASE_DIR)/kernel.c -o $(BUILD_DIR)/kernel.o
-	$(LD_NATIVE) -Ttext 0x1000 $(BUILD_DIR)/kernel.o --oformat binary -o $(BUILD_DIR)/kernel.bin 
-
-$(BUILD_DIR)/boot.bin: $(BOOT_DIR)/boot.asm build_folder
-	$(ASM) $(BOOT_DIR)/boot.asm -f bin -o $(BUILD_DIR)/boot.bin
+$(BUILD_DIR)/os.bin: $(KERNEL_DIR)/kernel.c $(KERNEL_DIR)/boot.s $(KERNEL_DIR)/linker.ld build_folder
+	$(ASM) $(KERNEL_DIR)/boot.s -o $(BUILD_DIR)/boot.o
+	$(GCC) -c $(KERNEL_DIR)/kernel.c -o $(BUILD_DIR)/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	$(GCC) -T $(KERNEL_DIR)/linker.ld -o $(BUILD_DIR)/os.bin -ffreestanding -O2 -nostdlib $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o -lgcc
 
 build_folder:
 	mkdir -p build
-
-# TOOLS:
-cross-compiler:
-	sh tools/setup-cross-compiler-arch.sh
-
 
 clean:
 	rm -rf $(BUILD_DIR)
