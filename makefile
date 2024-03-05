@@ -24,4 +24,4 @@ build_folder:
 	mkdir -p build
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) os.iso
